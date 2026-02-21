@@ -23,11 +23,13 @@ export default function (pi: ExtensionAPI) {
     mcpServerName: "unused",
   });
 
-  // Wrap streamSimple to always disable the MCP tool bridge.
-  // Pi's coding agent manages its own tools (read, write, edit, bash) —
-  // the CLI is only used for LLM inference, not tool execution.
+  // Wrap streamSimple to:
+  // 1. Disable the MCP tool bridge — pi manages its own tools
+  // 2. Strip sessionId — each stream() call is stateless (history is in stdin),
+  //    and reusing a session ID causes "already in use" errors
   const streamSimple: typeof pipe.streamSimple = (model, context, options) => {
-    return pipe.stream(model, context, { ...options, enableTools: false });
+    const { sessionId, ...rest } = options ?? {} as any;
+    return pipe.stream(model, context, { ...rest, enableTools: false });
   };
 
   pi.registerProvider("cli-pipe", {

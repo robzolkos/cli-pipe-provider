@@ -141,53 +141,20 @@ The provider writes a temporary MCP config, spawns the CLI with `--mcp-config`, 
 
 ### Using with the pi coding agent
 
-You can use cli-pipe-provider as a model provider for the [pi coding agent](https://github.com/badlogic/pi-mono/tree/main/packages/coding-agent).
+This package is also a [pi package](https://github.com/badlogic/pi-mono/tree/main/packages/coding-agent#pi-packages) that registers cli-pipe as a model provider for the [pi coding agent](https://github.com/badlogic/pi-mono/tree/main/packages/coding-agent).
 
-#### As a pi extension (CLI)
-
-Create an extension that registers cli-pipe as a provider, then load it with `pi -e`:
-
-```ts
-// pi-extension.ts
-import { createCliPipeProvider } from "cli-pipe-provider";
-import type { ExtensionAPI } from "@mariozechner/pi-coding-agent";
-
-export default function (pi: ExtensionAPI) {
-  const pipe = createCliPipeProvider({
-    command: "claude",
-    bridgeEntryPoint: "/dev/null",
-    mcpServerName: "unused",
-  });
-
-  // Wrap streamSimple to disable the MCP tool bridge —
-  // pi's coding agent manages its own tools.
-  const streamSimple: typeof pipe.streamSimple = (model, context, options) => {
-    return pipe.stream(model, context, { ...options, enableTools: false });
-  };
-
-  pi.registerProvider("cli-pipe", {
-    baseUrl: "local",
-    api: "cli-pipe",
-    apiKey: "not-needed",
-    models: [
-      {
-        id: "claude-sonnet-4-6",
-        name: "Claude Sonnet 4.6 (via CLI)",
-        reasoning: true,
-        input: ["text", "image"],
-        cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
-        contextWindow: 200000,
-        maxTokens: 16384,
-      },
-    ],
-    streamSimple,
-  });
-}
-```
+#### Install as a pi package
 
 ```bash
-cd examples && npm install
-pi -e /path/to/pi-extension.ts --model cli-pipe/claude-sonnet-4-6
+pi install git:github.com/robzolkos/cli-pipe-provider
+```
+
+Then use `/model` to select `cli-pipe/claude-sonnet-4-6` or `cli-pipe/claude-opus-4-6`.
+
+Or try it without installing:
+
+```bash
+pi -e git:github.com/robzolkos/cli-pipe-provider --model cli-pipe/claude-sonnet-4-6
 ```
 
 #### As an SDK integration

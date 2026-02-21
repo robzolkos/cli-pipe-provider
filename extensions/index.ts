@@ -5,14 +5,15 @@
  * use models through a local CLI (like `claude`) that supports
  * `-p --output-format stream-json`.
  *
- * Install:
- *   cd examples && npm install
+ * Install as a pi package:
+ *   pi install git:github.com/robzolkos/cli-pipe-provider
  *
- * Usage:
- *   pi -e /path/to/cli-pipe-provider/examples/pi-extension.ts
- *   # Then /model and select cli-pipe/claude-sonnet-4-6
+ * Or try without installing:
+ *   pi -e git:github.com/robzolkos/cli-pipe-provider
+ *
+ * Then use /model to select cli-pipe/claude-sonnet-4-6
  */
-import { createCliPipeProvider } from "cli-pipe-provider";
+import { createCliPipeProvider } from "../dist/index.js";
 import type { ExtensionAPI } from "@mariozechner/pi-coding-agent";
 
 export default function (pi: ExtensionAPI) {

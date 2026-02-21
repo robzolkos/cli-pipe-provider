@@ -1,6 +1,6 @@
 {
   "name": "cli-pipe-provider",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "description": "pi-ai provider for CLI tools that speak the stream-json format, with MCP tool bridge support",
   "license": "MIT",
   "keywords": ["pi-package"],

@@ -65,6 +65,7 @@ This is a standalone Node.js file that the CLI spawns as an MCP server. It expos
 // bridge.ts
 import { serveMcpBridge } from "cli-pipe-provider";
 import type { AgentTool } from "@mariozechner/pi-agent-core";
+import { Type } from "@sinclair/typebox";
 
 const tools: AgentTool[] = [
   {

@@ -1,0 +1,10 @@
+{
+  "name": "cli-pipe-provider-examples",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "cli-pipe-provider": "^0.1.1",
+    "@mariozechner/pi-coding-agent": "^0.54.0"
+  }
+}

@@ -65,6 +65,7 @@ This is a standalone Node.js file that the CLI spawns as an MCP server. It expos
 // bridge.ts
 import { serveMcpBridge } from "cli-pipe-provider";
 import type { AgentTool } from "@mariozechner/pi-agent-core";
+import { Type } from "@sinclair/typebox";
 
 const tools: AgentTool[] = [
   {
@@ -137,6 +138,68 @@ for await (const event of stream) {
 ```
 
 The provider writes a temporary MCP config, spawns the CLI with `--mcp-config`, and the CLI discovers and calls your tools during its agentic loop. The config is cleaned up automatically when the stream ends.
+
+### Using with the pi coding agent
+
+This package is also a [pi package](https://github.com/badlogic/pi-mono/tree/main/packages/coding-agent#pi-packages) that registers cli-pipe as a model provider for the [pi coding agent](https://github.com/badlogic/pi-mono/tree/main/packages/coding-agent).
+
+#### Install as a pi package
+
+```bash
+pi install git:github.com/robzolkos/cli-pipe-provider
+```
+
+Then use `/model` to select `cli-pipe/claude-sonnet-4-6` or `cli-pipe/claude-opus-4-6`.
+
+Or try it without installing:
+
+```bash
+pi -e git:github.com/robzolkos/cli-pipe-provider --model cli-pipe/claude-sonnet-4-6
+```
+
+#### As an SDK integration
+
+```ts
+import { createCliPipeProvider } from "cli-pipe-provider";
+import {
+  AuthStorage,
+  createAgentSession,
+  ModelRegistry,
+  SessionManager,
+} from "@mariozechner/pi-coding-agent";
+
+const pipe = createCliPipeProvider({
+  command: "claude",
+  bridgeEntryPoint: "/dev/null",
+  mcpServerName: "unused",
+});
+pipe.register();
+
+const model = pipe.createModel({ modelId: "claude-sonnet-4-6" });
+
+// cli-pipe doesn't need a real API key (the local CLI handles auth),
+// but the coding agent requires one to be set.
+const authStorage = AuthStorage.create();
+authStorage.setRuntimeApiKey("cli-pipe", "not-needed");
+const modelRegistry = new ModelRegistry(authStorage);
+
+const { session } = await createAgentSession({
+  model,
+  sessionManager: SessionManager.inMemory(),
+  authStorage,
+  modelRegistry,
+});
+
+session.subscribe((event) => {
+  if (event.type === "message_update" && event.assistantMessageEvent.type === "text_delta") {
+    process.stdout.write(event.assistantMessageEvent.delta);
+  }
+});
+
+await session.prompt("What files are in the current directory?");
+```
+
+See [`examples/`](examples/) for runnable versions.
 
 ## Stream options
 
